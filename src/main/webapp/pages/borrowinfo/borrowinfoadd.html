@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>新增图书信息</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<script src="../../scripts/boot.js" type="text/javascript"></script>
+<link href="../../demo/demo.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">
+html, body {
+	padding: 0;
+	margin: 0;
+	border: 0;
+	height: 100%;
+	overflow: hidden;
+}
+</style>
+</head>
+<body>
+
+	<form id="form1" method="post">
+		<fieldset style="border: solid 1px #aaa; padding: 3px; width: 450px">
+			<legend align="left">请填写借阅信息</legend>
+			<table align="center">
+				<tr>
+					<td><input labelField="true" label="剩余数量" id="remain"
+						name="remain" class="mini-textbox" readOnly="true" /></td>
+				</tr>
+				<tr>
+					<td><input labelField="true" label="所借图书：" id="bookId"
+						name="bookId" emptyText="请选择" class="mini-combobox"
+						url="../../borrowinfoaddaction?method=querybookinfo"
+						required="true" valueField="bookId" textField="bookName"
+						emptyText="请选择..." onValueChanged="onBookIdChanged" /></td>
+					<td><input labelField="true" label="借阅编号：" id="borrowId"
+						name="borrowId" emptyText="请输入编号" class="mini-textbox"
+						required="true" readonly="true" /></td>
+				</tr>
+				<tr>
+					<td><input labelField="true" label="借阅人：" id="borrower"
+						name="borrower" emptyText="请填写借阅人" class="mini-textbox"
+						required="true" requiredErrorText="借阅人不能为空" /></td>
+					<td><input labelField="true" label="联系电话：" id="phone"
+						name="phone" class="mini-textbox" required="true"
+						onvalidation="onPhoneValidation" /></td>
+				</tr>
+				<tr>
+					<td><input labelField="true" label="借阅时间：" id="borrowtime"
+						name="borrowtime" class="mini-datepicker" style="width: 250px;"
+						allowinput="false" timeFormat="HH:mm:ss"
+						format="yyyy-MM-dd HH:mm:ss" showTime="true"
+						ondrawdate="onDrawDate" /></td>
+				</tr>
+			</table>
+			</div>
+		</fieldset>
+		<div style="text-align: center; padding: 10px;">
+			<a class="mini-button" onclick="onOk()"
+				style="width: 60px; margin-right: 20px;">保存</a> <a
+				class="mini-button" onclick="onCancel()" style="width: 60px;">取消</a>
+		</div>
+	</form>
+	<script type="text/javascript">
+        mini.parse();
+
+        setFormValue();
+        var form = new mini.Form("form1");
+
+        
+        function SetData(data){
+        	if(data.action == "listButton"){
+        		//跨页面传输的数据对象
+        		data = mini.clone(data);
+        		var remain = data.remain;
+        		var bookId = data.bookId;
+        		$.ajax({
+        			url: "../../borrowinfoaddaction?method=getbooknamebybookid&bookid=" + bookId,
+        			type: 'post',
+        			cache: false,
+        			success: function(text){
+        				mini.get("remain").setValue(remain);
+        				mini.get("remain").setEnabled(false);
+        				//下拉列表具有两个值，一个是text，一个是value
+        				mini.get("bookId").setValue(bookId);
+        				//mini.get("bookId").setText(text);
+        				//因为是下拉列表控件，只需要传递一个value值即可正确显示
+        				mini.get("bookId").setEnabled(false);
+        			},
+        			error: function (jqXHR, textStatus, errorThrown){
+        				alert(jqXHR.responseText);
+                        CloseWindow();
+        			}
+        		});
+        	}
+        }
+        
+        //保存数据
+        function SaveData() {
+            var o = form.getData();            
+
+            form.validate();
+            if (form.isValid() == false){
+            	return;
+            }
+
+            var json = mini.encode(o);
+            $.ajax({
+                url: "../../borrowinfoaddaction?method=addborrowinfo",
+		        type: 'post',
+                data: { data: json },
+                cache: false,
+                success: function (text) {
+                    mini.alert(text, "提示：", function(){
+                        CloseWindow("save");
+                    })	
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseText);
+                    CloseWindow();
+                }
+            });
+        }
+        
+        //设置控件的初始值
+        function setFormValue(){
+        	$.ajax({
+        		//发送请求到后台获取下一个borrowid
+        		url: "../../borrowinfoaddaction?method=getnextborrowid",
+        		type: 'post',
+        		cache: false,
+        		success: function(text){
+        			//设置借阅编号
+        			mini.get("borrowId").setValue(text);
+        			//设置默认时间
+        			mini.get("borrowtime").setValue(new Date());
+        		},
+        		error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseText);
+                    CloseWindow();
+        		}
+        	});
+        }
+
+        //时间范围的验证
+        function onDrawDate(e) {
+            var date = e.date;
+            var d = new Date();
+
+            if (date.getTime() > d.getTime()) {
+                e.allowSelect = false;
+            }
+        }
+        
+        //验证电话号码是否为11位
+        function onPhoneValidation(e){
+        	if(e.isValid){
+        		var pattern = /^\d{11}$/;
+        		if(pattern.test(e.value) == false){
+        			e.errorText = "必须输入11位数字";
+        			e.isValid = false;
+        		}
+        	}
+        }
+        
+        //当所选图书发生变化时，获取图书的剩余数量
+        function onBookIdChanged(e){
+        	var bookId = e.value;
+        	$.ajax({
+        		url: "../../bookinfolistaction?method=queryremainbybookid&bookId=" + bookId,
+        		type: 'post',
+        		cahce: false,
+        		success: function(text){
+        			//返回剩余数量
+        			mini.get("remain").setValue(text);
+        		},
+        		error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseText);
+                    CloseWindow();
+        		}
+        	});
+        }
+        
+        //关闭窗口
+        function CloseWindow(action) {            
+            if (window.CloseOwnerWindow){
+            	return window.CloseOwnerWindow(action);
+            }
+            else{
+            	return window.close();            
+            }
+        }
+        function onOk(e) {
+            SaveData();
+        }
+        function onCancel(e) {
+            CloseWindow("cancel");
+        }
+
+    </script>
+</body>
+</html>

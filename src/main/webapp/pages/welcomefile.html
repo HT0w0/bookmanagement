@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>欢迎页</title>
+<script src="../scripts/boot.js" type="text/javascript"></script>
+<link href="../demo/demo.css" rel="stylesheet" type="text/css" />
+<style>
+/* 页面整体样式 */
+body {
+	margin: 0;
+	padding: 20px;
+	background-color: #f0f2f5; /* 与主页面风格统一的背景色 */
+	font-family: "Microsoft YaHei", Arial, sans-serif;
+}
+
+/* 容器样式，用于居中所有内容 */
+.welcome-container {
+	max-width: 900px; /* 限制最大宽度，避免图片过大 */
+	margin: 0 auto; /* 水平居中 */
+	text-align: center; /* 内部内容水平居中 */
+}
+
+/* 欢迎文字样式 */
+.welcome-title {
+	font-size: 36px; /* 放大字体 */
+	font-weight: 300; /* 加粗 */
+	color: #1a237e; /* 深蓝色，与主页面标题颜色呼应 */
+	margin-bottom: 25px; /* 与图片保持足够间距 */
+	letter-spacing: 2px; /* 增加字间距，更美观 */
+}
+
+/* 图书馆图片样式 */
+.library-img {
+	width: 100%; /* 宽度自适应容器 */
+	max-width: 800px; /* 限制图片最大宽度 */
+	height: auto; /* 高度自动，保持比例 */
+	border-radius: 8px; /* 增加圆角，更现代 */
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 增强阴影，提升层次感 */
+	display: block; /* 确保图片为块级元素，方便居中 */
+	margin: 0 auto; /* 水平居中 */
+}
+</style>
+</head>
+<body>
+	<div class="welcome-container">
+		<h1 class="welcome-title">欢迎来到图书管理系统</h1>
+		<img src="../images/bookmanagement.jpg" alt="图书馆照片"
+			class="library-img">
+	</div>
+</body>
+</html>
